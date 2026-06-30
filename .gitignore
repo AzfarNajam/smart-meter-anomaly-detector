@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+env/
+
+# Data — the raw dataset is ~130MB+ and trivially re-downloadable via
+# ucimlrepo (see data/README.md), so it's never committed to git
+data/*.csv
+data/*.zip
+data/*.txt
+
+# Logs — generated output, not source code. Run tests/test_logging.py
+# locally to regenerate these
+logs/*.log
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

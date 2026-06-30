@@ -1,0 +1,10 @@
+# Day 1 (logging framework) needs none of these — it only uses Python's
+# built-in `logging` and `json` modules on purpose, so it has zero setup
+# friction. These are needed starting Day 2 (data + attack simulation)
+# onward.
+
+pandas
+numpy
+scikit-learn
+matplotlib
+ucimlrepo
