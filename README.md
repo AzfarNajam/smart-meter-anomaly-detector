@@ -1,7 +1,7 @@
 # Smart Meter / Solar Inverter False Data Injection Detector
 
 A Python anomaly detection system for identifying manipulated smart meter
-and solar inverter data — built around a real, current threat rather than
+and solar inverter data built around a real, current threat rather than
 a textbook exercise.
 
 ## Why this project
@@ -13,13 +13,13 @@ through false data injection attacks, and EU regulators flagged solar
 inverter supply chains as a high-risk dependency in 2026, following a real
 attack on Poland's solar infrastructure in December 2025. Despite growing
 regulatory attention (NIS2, the Cyber Resilience Act), accessible
-open-source detection tooling for this specific attack class is rare —
+open-source detection tooling for this specific attack class is rare,
 most of what exists stays inside academic papers rather than usable
 software.
 
 This project builds a working, explainable false data injection detector
-for time-series energy data, combining statistical methods with machine
-learning, and with investigation-grade structured logging built in from
+for time series energy data, combining statistical methods with machine
+learning, and with investigation grade structured logging built in from
 day one rather than bolted on at the end.
 
 ## Project status
