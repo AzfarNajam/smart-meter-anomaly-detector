@@ -1,27 +1,33 @@
 # data/
 
-This folder holds the baseline dataset used to model "normal" household
-energy consumption, before any attacks are simulated on top of it.
+Holds the baseline consumption dataset. Raw data files are not committed
+(see `.gitignore`) because the UCI file is over 130MB and reproducible from
+source, so committing it would bloat the repo for no benefit.
 
-**Dataset:** UCI Individual Household Electric Power Consumption
+## Default: calibrated synthetic data
+
+`src/data_loader.py` generates synthetic hourly data by default, matched to
+the UCI dataset's statistical profile (mean 0.98 kW against UCI's 1.09, with
+the same daily and weekly structure). No download needed, so the repo runs
+immediately on clone.
+
+## Real data: UCI Individual Household Electric Power Consumption
+
+2,075,259 minute-level measurements from one household in France, December
+2006 to November 2010.
+
 https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption
 
-2,075,259 minute-level measurements from one household in France over
-almost 4 years (2006-2010) — real consumption patterns, not synthetic.
-
-## To fetch it (Day 2)
-
-```
+```bash
 pip install ucimlrepo
 ```
 
-```python
-from ucimlrepo import fetch_ucirepo
-dataset = fetch_ucirepo(id=235)
-df = dataset.data.features
-```
+Then in `main.py` swap `generate_synthetic_data(days=90)` for
+`load_uci_dataset()`. Identical schema, so nothing downstream changes.
 
-Raw data files are intentionally **not** committed to this repo (see
-`.gitignore`) — the file is 130MB+ uncompressed and trivially reproducible
-from the source above, so committing it would just bloat the repo for no
-reason.
+## Other datasets worth knowing about
+
+- **Pecan Street Dataport**: real smart meter data from many homes with
+  appliance-level breakdown. Requires academic registration.
+- **UMass Smart* Dataset**: three homes, includes solar generation. Useful
+  for extending this to solar inverter attacks.

@@ -1,10 +1,8 @@
-# Day 1 (logging framework) needs none of these — it only uses Python's
-# built-in `logging` and `json` modules on purpose, so it has zero setup
-# friction. These are needed starting Day 2 (data + attack simulation)
-# onward.
+pandas>=2.0
+numpy>=1.24
+scikit-learn>=1.3
+matplotlib>=3.7
 
-pandas
-numpy
-scikit-learn
-matplotlib
-ucimlrepo
+# Optional: only needed to run against the real UCI dataset instead of the
+# calibrated synthetic default. See load_uci_dataset() in src/data_loader.py
+# ucimlrepo
