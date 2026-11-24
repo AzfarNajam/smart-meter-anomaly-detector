@@ -17,3 +17,6 @@ logs/*.log
 .idea/
 .DS_Store
 Thumbs.db
+bills/
+data/*.sqlite3*
+.env*

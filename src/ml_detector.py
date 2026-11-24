@@ -185,10 +185,10 @@ class IsolationForestDetector:
             log_detection(
                 meter_id=self.meter_id,
                 raw_reading=float(row["reported_power_kw"]),
-                expected_value=float(row["reported_power_kw"]),  # IF gives no expectation
+                expected_value=None,
                 deviation_score=float(row["if_score"]),
                 detector_name="isolation_forest",
-                suspected_attack_type=str(row.get("attack_type", "unknown")),
+                suspected_attack_type="unknown",
                 severity="high" if row["if_score"] > 0.1 else "medium",
             )
 

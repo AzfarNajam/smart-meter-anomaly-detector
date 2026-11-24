@@ -10,13 +10,16 @@ Run it with:
 (run from the project root folder, not from inside tests/)
 """
 
+import json
 import sys
 from pathlib import Path
 
 # Allow this script to import from src/ when run directly
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.logger_config import log_detection, log_operational, log_audit
+from src.data_loader import generate_synthetic_data
+from src.detector import compute_seasonal_baselines
+from src.logger_config import LOG_DIR, log_detection, log_operational, log_audit
 
 
 def run_smoke_test():
@@ -47,14 +50,30 @@ def run_smoke_test():
         old_value=3.0,
         new_value=3.5,
         reason="reducing false positives during testing",
-        changed_by="azfar",
+        changed_by="smoke-test",
     )
 
-    print("\nSmoke test complete. Check the logs/ folder for three new files:")
-    print("  - logs/detection.log")
-    print("  - logs/operational.log")
-    print("  - logs/audit.log")
-    print("\nEach line in those files should be a single JSON object.")
+    baseline = generate_synthetic_data(days=30)
+    compute_seasonal_baselines(baseline)
+    try:
+        compute_seasonal_baselines(baseline.iloc[:0])
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("An empty seasonal baseline should be rejected")
+
+    rows = {}
+    for category in ("detection", "operational", "audit"):
+        path = LOG_DIR / f"{category}.log"
+        rows[category] = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+        assert rows[category] and all({"timestamp", "level", "event"} <= row.keys()
+                                      for row in rows[category])
+    assert any(row["event"] == "anomaly_detected" for row in rows["detection"])
+    assert any(row["event"] == "config_change" for row in rows["audit"])
+    assert any(row["level"] == "ERROR" for row in rows["operational"])
+    assert any(row["level"] == "WARNING" and "smallest group" in row["message"]
+               for row in rows["operational"])
+    print("Structured logging and seasonal baseline checks passed.")
 
 
 if __name__ == "__main__":

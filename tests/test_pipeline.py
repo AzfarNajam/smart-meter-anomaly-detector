@@ -9,6 +9,7 @@ Run from the project root:
     python tests/test_pipeline.py
 """
 
+import json
 import sys
 from pathlib import Path
 import numpy as np
@@ -20,6 +21,7 @@ from src.data_loader import generate_synthetic_data
 from src.attack_injector import inject_all_attacks
 from src.detector import ZScoreDetector, CUSUMDetector, ReplayDetector
 from src.ml_detector import IsolationForestDetector
+from src.logger_config import LOG_DIR
 from src.evaluate import confusion_counts, metrics_from_counts
 
 results = []
@@ -75,6 +77,19 @@ def run():
 
     i = IsolationForestDetector().fit(baseline).score(test)
     check("isolation forest produces flags", int(i.if_flagged.sum()) > 0)
+
+    alerts = [json.loads(line) for line in (LOG_DIR / "detection.log").read_text(
+        encoding="utf-8").splitlines()]
+    check("alerts use detector hypotheses independently of fixture labels",
+          bool(alerts) and all(
+              alert["suspected_attack_type"] ==
+              ("replay" if alert["detector"].startswith("replay_rule_") else "unknown")
+              for alert in alerts
+          ))
+    check("replay and Isolation Forest alerts omit unavailable expected readings",
+          all(alert["expected_value"] is None for alert in alerts
+              if alert["detector"] == "isolation_forest" or
+              alert["detector"].startswith("replay_rule_")))
 
     m = metrics_from_counts(confusion_counts([True, True, False, False],
                                              [True, False, True, False]))

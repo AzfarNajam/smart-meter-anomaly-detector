@@ -130,14 +130,17 @@ def compute_seasonal_baselines(baseline_df: pd.DataFrame) -> pd.DataFrame:
                 .agg(["mean", "std", "count"]).reset_index())
     stats["std"] = stats["std"].fillna(0.1).clip(lower=0.05)
 
+    if stats.empty:
+        raise ValueError("Seasonal baseline requires usable readings")
+
     min_n = int(stats["count"].min())
     log_operational("detector", "ok",
                     f"Seasonal baselines built: {len(stats)} (hour, is_weekend) groups "
                     f"from {len(baseline_df)} clean readings; smallest group n={min_n}")
     if min_n < 10:
-        log_operational("detector", "error",
-                        f"Baseline too short: smallest group has only {min_n} samples. "
-                        f"std estimates will be unstable. Use >= 30 days of baseline.")
+        log_operational("detector", "warning",
+                        f"Sparse seasonal baseline: smallest group has {min_n} readings. "
+                        "Aim for at least 10 readings per hour and weekday/weekend group.")
     return stats
 
 
@@ -191,7 +194,7 @@ class ZScoreDetector:
                 expected_value=round(float(row["mean"]), 4),
                 deviation_score=abs(float(row["zscore"])),
                 detector_name="zscore_seasonal",
-                suspected_attack_type=str(row.get("attack_type", "unknown")),
+                suspected_attack_type="unknown",
                 severity="high" if abs(row["zscore"]) > 5 else "medium",
             )
 
@@ -346,7 +349,7 @@ class CUSUMDetector:
                 expected_value=round(float(row["reported_power_kw"] - row["residual"]), 4),
                 deviation_score=round(score_val, 4),
                 detector_name="cusum_residual",
-                suspected_attack_type=str(row.get("attack_type", "unknown")),
+                suspected_attack_type="unknown",
                 severity="high" if score_val > self.h * 2 else "medium",
             )
 
@@ -466,10 +469,10 @@ class ReplayDetector:
             log_detection(
                 meter_id=self.meter_id,
                 raw_reading=float(row["reported_power_kw"]),
-                expected_value=float(row["reported_power_kw"]),
+                expected_value=None,
                 deviation_score=0.0,   # no magnitude deviation: that IS the signal
                 detector_name=f"replay_rule_lag{self.lag_hours}h",
-                suspected_attack_type=str(row.get("attack_type", "unknown")),
+                suspected_attack_type="replay",
                 severity="high",
             )
 

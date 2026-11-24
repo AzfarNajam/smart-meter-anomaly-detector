@@ -89,7 +89,7 @@ audit_logger        = _build_logger("audit",        "audit.log")
 ground_truth_logger = _build_logger("ground_truth", "ground_truth.log")
 
 
-def log_detection(meter_id: str, raw_reading: float, expected_value: float,
+def log_detection(meter_id: str, raw_reading: float, expected_value: float | None,
                   deviation_score: float, detector_name: str,
                   suspected_attack_type: str, severity: str) -> None:
     """Log a single flagged anomaly."""
@@ -107,7 +107,7 @@ def log_detection(meter_id: str, raw_reading: float, expected_value: float,
 
 def log_operational(component: str, status: str, message: str = "") -> None:
     """Log pipeline health, separate from what the pipeline detects."""
-    level = logging.INFO if status == "ok" else logging.ERROR
+    level = {"ok": logging.INFO, "warning": logging.WARNING}.get(status, logging.ERROR)
     operational_logger.log(level, {
         "event": "operational_status",
         "component": component,
